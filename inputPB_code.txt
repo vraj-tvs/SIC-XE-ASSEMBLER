@@ -1,0 +1,35 @@
+copy    start   0 
+first   stl     retadr
+cloop   jsub    rdrec
+        lda     length 
+        comp    #0 
+        jeq     endfil
+        j       cloop
+endfil  J       @retadr
+        use     cdata
+retadr  resw    1
+length  resw    1
+        use     cblks
+buffer  resb    4096
+bufend  equ     *
+maxlen  equ     4096
+        use
+rdrec   clear   x 
+        clear   a
+        clear   s 
+        +ldt    #maxlen
+loop    td      input 
+        jeq     loop 
+ .gkjbhlnl
+        rd      input
+com     pr      a, s
+        jeq     exit 
+ 
+        stch    buffer,x
+        tixr    t
+        jlt     loop
+exit    stx     length
+        rsub
+        use     cdata
+input   byte    x'f3'
+        end     first

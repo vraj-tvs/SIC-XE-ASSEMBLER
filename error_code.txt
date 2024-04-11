@@ -1,0 +1,28 @@
+test 	start 	1000 
+first 	stl 	retadr
+cloop 	jsub 	rdrec
+		lda 	length 
+		comp 	zero 
+		jeq 	endfil
+		j 		cloop
+endfil 	ldl 	retadr
+		rsub
+zero 	word 	0
+retadr 	resw 	1
+length 	resw 	1
+buffer 	resb 	4096
+rdrec 	ldx 	zero 
+		lda 	zero 
+loop 	td 		input 
+		jeq 	loop
+		rd 		input
+		comp 	zero
+		jeq 	exit
+		stch 	buffer,x
+		tix 	maxlen
+		jlt 	loop
+exit 	stx 	length
+		rsub
+input 	byte 	x'f3'
+maxlen 	word 	4096 
+		end 	first
