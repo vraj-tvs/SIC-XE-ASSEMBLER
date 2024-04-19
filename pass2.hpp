@@ -456,6 +456,10 @@ void PASS2(string inter, string out, string out2)
             PrintLineV2(LOCCTR, current_block_number, label, opcode, operand, temp);
             t.Insert(temp, LOCCTR + BLOCKTAB[block_mapping[current_block_number].second].start);
         }
+        else{
+            PrintLineV2(LOCCTR, current_block_number, label, opcode, operand, "");
+            error+="Line Number "+to_string(line_number)+": Invalid Opcode\n";
+        }   
         line_number++;
     }
     e = "E^" + IntToHexString(start, 2);

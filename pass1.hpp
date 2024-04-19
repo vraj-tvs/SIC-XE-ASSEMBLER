@@ -245,7 +245,7 @@ void InitializeSegments(string &s)
     else
     {
         label = x[0];
-        if (OPTAB.find(x[1]) != OPTAB.end() || ASMDIR.find(x[1]) != ASMDIR.end())
+        if (sz(x)>=2)
         {
             opcode = x[1];
             string p = "";
@@ -256,7 +256,9 @@ void InitializeSegments(string &s)
         } 
         else
         {
-            error+="Line Number "+to_string(line_number)+": Invalid Instruction\n";
+            label="";
+            opcode=x[0];
+            operand="";
         }
     }
 }
@@ -406,17 +408,19 @@ void PASS1(string ifile, string ofile)
     PrintLine();
 
     line_number++;
-    while (opcode != "END")
+    bool End=0;
+    while (getline(fin, line))
     {
-        getline(fin, line);
         if (IsCommentLine(line))
             continue;
 
         InitializeSegments(line);
         if (sz(label) != 0)
         {
-            if (SYMTAB.find(label) != SYMTAB.end())
+            if (SYMTAB.find(label) != SYMTAB.end()){
                 SYMTAB[label].error = 1;
+                error+="Line number "+to_string(line_number)+": Repeated Label\n";
+            }
             else
                 SYMTAB[label].error = 0;
             SYMTAB[label].block = current_block_number;
@@ -443,8 +447,10 @@ void PASS1(string ifile, string ofile)
                 len = GetLengthForLOCCTR();
                 name += IntToHexString(LOCCTR);
             }
-            if (LITTAB.find(name) != LITTAB.end() && LITTAB[name].blocknumber == current_block_number)
+            if (LITTAB.find(name) != LITTAB.end() && LITTAB[name].blocknumber == current_block_number){
                 LITTAB[name].error = 1;
+                error+="Line number "+to_string(line_number)+": Repeated Literal\n";
+            }
             else
                 LITTAB[name].error = 0;
             LITTAB[name].length = len;
@@ -525,8 +531,16 @@ void PASS1(string ifile, string ofile)
                 }
             }
         }
+        else if(opcode=="END") 
+            End=1;
+        else
+            error+="Line number "+to_string(line_number)+": Invalid Opcode\n";
+
         line_number++;
     }
+
+    if(!End) 
+        error+="Line number "+to_string(line_number)+": END not found.\n";
     HandleLTORG();
     BLOCKTAB[current_block].length = LOCCTR;
     ModifyBLKTAB();
